@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import './App.css'
 import { io } from 'socket.io-client'
-
+import { Dashboard } from './view/Dashboard/Dashboard'
+// import "tailwindcss";
 
 function App() {
 
@@ -10,7 +11,6 @@ function App() {
   const [socketID, setSocketID] = useState<string>('')
   const [allMessages, setAllMessages] = useState<any>([])
   const [ roomName, setRoomName] = useState<any>('')
-
 
   const socket:any = useMemo( () => io('http://localhost:8080'), [] )
 
@@ -47,8 +47,8 @@ function App() {
 
   return (
     <>
-      <div>
-        <h1>Welcome to the Streammer</h1>
+      {/* <div className='w-[500px] m-auto mt-20'>
+        <h1 className='font-bold text-center w-full border-2'>Welcome to the Streammer</h1>
         <div>
           {socketID}
         </div>
@@ -70,8 +70,9 @@ function App() {
             })
           }
         </div>
-      </div>
-      
+      </div>  */}
+
+      <Dashboard/>
     </>
   )
 }

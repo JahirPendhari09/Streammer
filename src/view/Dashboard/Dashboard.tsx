@@ -1,4 +1,4 @@
-import React, { useState, ReactNode, act } from 'react';
+import React, { useState, ReactNode, act, useEffect } from 'react';
 import { AiOutlineHome, AiFillHome } from "react-icons/ai";
 import { FaSearch, FaRunning } from "react-icons/fa";
 import { CiSearch } from "react-icons/ci";
@@ -160,10 +160,17 @@ export const Dashboard = () => {
     setActiveVideo(updatedVideo);
   };
 
+  useEffect(() =>  {
+    const videoChangeInterval = setInterval(() =>{
+      handleNext()
+    }, 5000)
+    return () => clearInterval(videoChangeInterval)
+  },[])
+
   return (
     <div className='bg-black h-[100vh] w-full text-white'>
-      <div className='w-full h-full max-w-[1200px] border-1 border-neutral-500 m-auto rounded-2xl flex overflow-hidden '>
-        <div className='w-[5%] min-w-[100px] h-full flex flex-col'>
+      <div className=' h-full max-w-[1400px] border-1 border-neutral-500 m-auto rounded-2xl flex overflow-hidden'>
+        <div className='w-[100px] h-full flex flex-col'>
           <div className='w-full h-[100px] flex justify-center items-center'>
             <div>Logo</div>
           </div>
@@ -251,10 +258,9 @@ export const Dashboard = () => {
             />
           </div>
         </div>
-        <div className='w-[95%] h-full'>
-          <div className='flex flex-col w-full h-full gap-10'>
-            <button onClick={handlePrev}>Prev</button>
-            <div className='w-full h-[400px] flex justify-center items-center relative'>
+        <div className='w-[1300px] h-full  border-2'>
+          <div className='flex h-full flex-col w-full h-full gap-10 overflow-y-auto whitespace-nowrap scroll-smooth no-scrollbar'>
+            <div className='w-full h-[800px] flex justify-center items-center relative'>
               {
                 activeVideo.length > 0 && activeVideo.map((item, i) => {
                   return (
@@ -267,7 +273,7 @@ export const Dashboard = () => {
                         className={`w-full h-full rounded ${item.color}`} 
                         onClick={() => handleVideoClick(item)}
                       >
-                        <iframe
+                        {/* <iframe
                           key={item.url} 
                           title={`YouTube video ${item.label}`}
                           className='w-full h-[180px] rounded'
@@ -275,14 +281,50 @@ export const Dashboard = () => {
                           frameBorder="0"
                           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                           allowFullScreen
-                        ></iframe>
+                        ></iframe> */}
+                        <div key={item.url}>
+                        </div>
                       </div>
                     </div>
                   )
                 })
               }
             </div>
-            <button onClick={handleNext}>Next</button>
+            <div className='w-[100%] overflow-x-auto whitespace-nowrap scroll-smooth no-scrollbar min-h-[300px] border-2 p-4 flex gap-4 cursor-pointer'>
+              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
+              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
+              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
+              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
+              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
+              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
+              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
+              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
+              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
+            </div>
+            
+            <div className='w-[100%] overflow-x-auto whitespace-nowrap scroll-smooth no-scrollbar min-h-[300px] border-2 p-4 flex gap-4 cursor-pointer'>
+              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
+              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
+              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
+              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
+              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
+              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
+              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
+              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
+              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
+            </div>
+
+            <div className='w-[100%] overflow-x-auto whitespace-nowrap scroll-smooth no-scrollbar min-h-[300px] border-2 p-4 flex gap-4 cursor-pointer'>
+              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
+              <div className='min-w-[200px] border-2 h-full rounded-xl '></div>
+              <div className='min-w-[200px] border-2 h-full rounded-xl '></div>
+              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
+              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
+              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
+              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
+              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
+              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
+            </div>
           </div>
         </div>
       </div>

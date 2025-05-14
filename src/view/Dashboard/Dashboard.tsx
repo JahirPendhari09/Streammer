@@ -1,10 +1,11 @@
-import React, { useState, ReactNode, act, useEffect } from 'react';
+import React, { useState, ReactNode, act, useEffect, useMemo } from 'react';
 import { AiOutlineHome, AiFillHome } from "react-icons/ai";
 import { FaSearch, FaRunning } from "react-icons/fa";
 import { CiSearch } from "react-icons/ci";
 import { IoTvOutline, IoTv } from "react-icons/io5";
 import { BiSolidVideoRecording, BiVideoRecording, BiMoviePlay, BiSolidMoviePlay } from "react-icons/bi";
 import { TbCategoryFilled, TbCategory2 } from "react-icons/tb";
+import axios from 'axios';
 
 const size = 20;
 
@@ -27,7 +28,7 @@ type videoDataType = {
   url: string
 }
 
-const videos:Array<videoDataType> = [
+const videos: Array<videoDataType> = [
   {
     id: 1,
     label: 'A',
@@ -50,7 +51,7 @@ const videos:Array<videoDataType> = [
     id: 4,
     label: 'D',
     color: 'bg-green-200',
-    url: "https://www.youtube.com/embed/3JZ_D3ELwOQ", 
+    url: "https://www.youtube.com/embed/3JZ_D3ELwOQ",
   },
   {
     id: 5,
@@ -68,69 +69,24 @@ export const Dashboard = () => {
   const [onBlurTab, setBlurTab] = useState<string>('');
   const [isSidebarActive, setSidebarActive] = useState<boolean>(false);
   const [activeVideo, setActiveVideo] = useState(videos)
+  const [images, setImages] = useState([])
 
-  const handleActiveTab = (tab:string) => {
+  const handleActiveTab = (tab: string) => {
     setActiveTab(tab)
   }
-  
-  // const handleVideoClick = (item:videoDataType) => {
-  //   const getIndex = activeVideo.indexOf(item)
-  //   if(getIndex === activeVideoIdx) return
-    
-  //   let updatedVideo:any = []
 
-  //   if( getIndex < activeVideoIdx) {
-  //     let index = activeVideoIdx - getIndex 
-  //     activeVideo.forEach((video:any, i):any => {
-  //       let j  = i + index;
-  //       if( j == activeVideo.length) {
-  //         j = 0;
-  //       }else if ( j > activeVideo.length) {
-  //         j = 1
-  //       }
-  //       updatedVideo[j] =  video
-  //     })
-  //     setActiveVideo(updatedVideo)
-  //   }else {
-  //     let index = getIndex - activeVideoIdx
-  //     for(let i=activeVideo.length-1; i >= 0; i--) {
-  //       let j  = i - index;
-  //       if( j == -1) {
-  //         j = activeVideo.length -1;
-  //       }else if ( j  < -1) {
-  //         j = activeVideo.length -2
-  //       }
-  //       updatedVideo[j] =  activeVideo[i]
-  //     }
-  //     setActiveVideo(updatedVideo)
-  //   }
-  // }
-
-  // const handleNext = () => {
-  //   const updatedVideo = []; 
-  //   for(let i=0; i<activeVideo.length; i++) {
-  //     let index  ;
-  //     if(i === activeVideo.length-1) {
-  //       index = 0
-  //     }else {
-  //       index = i+1
-  //     }
-  //     updatedVideo[index] = activeVideo[i]
-  //   }
-  //   setActiveVideo(updatedVideo)
-  // }
-
-  // const handlePrev = () => {
-  //   const updatedVideo = []; 
-  //   for(let i=0; i<activeVideo.length; i++) {
-  //     let index = i-1;
-  //     if(index === -1) {
-  //       index = activeVideo.length-1
-  //     } 
-  //     updatedVideo[index] = activeVideo[i]
-  //   }
-  //   setActiveVideo(updatedVideo)
-  // }
+  const fetchPosts = async () => {
+    try {
+      const response = await axios.get('https://api.jikan.moe/v4/anime?type=movie')
+      const data = response.data.data
+      setImages(data)
+    } catch (err) {
+      console.log(err)
+    }
+  }
+  useEffect(() => {
+    fetchPosts()
+  }, [])
 
   const handleVideoClick = (item: videoDataType) => {
     const getIndex = activeVideo.indexOf(item);
@@ -160,12 +116,40 @@ export const Dashboard = () => {
     setActiveVideo(updatedVideo);
   };
 
-  useEffect(() =>  {
-    const videoChangeInterval = setInterval(() =>{
-      handleNext()
-    }, 5000)
-    return () => clearInterval(videoChangeInterval)
-  },[])
+  useEffect(() => {
+    const videoChangeInterval = setInterval(() => {
+      setActiveVideo((prev) => {
+        const total = prev.length;
+        return prev.map((_, i) => prev[(i + total - 1) % total]);
+      });
+    }, 5000);
+    return () => clearInterval(videoChangeInterval);
+  }, []);
+
+
+  const imageGrid1 = useMemo(() => (
+    images.slice(0, 10).map((image) => (
+      <div key={image.mal_id} className='min-w-[200px] border-2 h-full rounded-xl overflow-hidden'>
+        <img src={image.images['jpg'].image_url} loading="lazy" className='w-full h-full' />
+      </div>
+    ))
+  ), [images]);
+
+  const imageGrid2 = useMemo(() => (
+    images.slice(10).map((image) => (
+      <div key={image.mal_id} className='min-w-[200px] border-2 h-full rounded-xl overflow-hidden'>
+        <img src={image.images['jpg'].image_url} loading="lazy" className='w-full h-full' />
+      </div>
+    ))
+  ), [images]);
+
+  const reversedGrid = useMemo(() => (
+    [...images].reverse().map((image) => (
+      <div key={image.mal_id} className='min-w-[200px] border-2 h-full rounded-xl overflow-hidden'>
+        <img src={image.images['jpg'].image_url} loading="lazy" className='w-full h-full' />
+      </div>
+    ))
+  ), [images]);
 
   return (
     <div className='bg-black h-[100vh] w-full text-white'>
@@ -187,7 +171,7 @@ export const Dashboard = () => {
               iconInactive={<AiOutlineHome color='gray' size={size} />}
               label='Home'
               tabName='home'
-              activeTab= {activeTab}
+              activeTab={activeTab}
               setActiveTab={handleActiveTab}
             />
             <SidebarItem
@@ -198,7 +182,7 @@ export const Dashboard = () => {
               iconInactive={<CiSearch color='gray' size={size} />}
               label='Search'
               tabName='search'
-              activeTab= {activeTab}
+              activeTab={activeTab}
               setActiveTab={handleActiveTab}
             />
             <SidebarItem
@@ -209,7 +193,7 @@ export const Dashboard = () => {
               iconInactive={<IoTvOutline color='gray' size={size} />}
               label='TV'
               tabName='tv-show'
-              activeTab= {activeTab}
+              activeTab={activeTab}
               setActiveTab={handleActiveTab}
             />
             <SidebarItem
@@ -220,7 +204,7 @@ export const Dashboard = () => {
               iconInactive={<BiMoviePlay color='gray' size={size} />}
               label='Movies'
               tabName='movies'
-              activeTab= {activeTab}
+              activeTab={activeTab}
               setActiveTab={handleActiveTab}
             />
             <SidebarItem
@@ -231,7 +215,7 @@ export const Dashboard = () => {
               iconInactive={<FaRunning color='gray' size={size} />}
               label='Sports'
               tabName='sports'
-              activeTab= {activeTab}
+              activeTab={activeTab}
               setActiveTab={handleActiveTab}
             />
             <SidebarItem
@@ -242,7 +226,7 @@ export const Dashboard = () => {
               iconInactive={<BiVideoRecording color='gray' size={size} />}
               label='Sparks'
               tabName='sparks'
-              activeTab= {activeTab}
+              activeTab={activeTab}
               setActiveTab={handleActiveTab}
             />
             <SidebarItem
@@ -253,7 +237,7 @@ export const Dashboard = () => {
               iconInactive={<TbCategory2 color='gray' size={size} />}
               label='Categories'
               tabName='categories'
-              activeTab= {activeTab}
+              activeTab={activeTab}
               setActiveTab={handleActiveTab}
             />
           </div>
@@ -266,11 +250,11 @@ export const Dashboard = () => {
                   return (
                     <div className={`w-[300px] h-[200px] border-2 rounded-2xl overflow-hidden
                       ${i === 1 ? 'left-30' : i === 3 ? 'right-30' : i === 4 ? 'right-0' : i == 0 ? 'left-0' : ''}
-                      ${i === 2 ? 'z-100 left-50 w-[600px] h-[300px]' : (i === 1 || i == 3) ? 'z-50 absolute' : 'z-10 absolute' }`}
+                      ${i === 2 ? 'z-100 left-50 w-[600px] h-[300px]' : (i === 1 || i == 3) ? 'z-50 absolute' : 'z-10 absolute'}`}
                       key={item.id}
                     >
-                      <div 
-                        className={`w-full h-full rounded ${item.color}`} 
+                      <div
+                        className={`w-full h-full rounded ${item.color}`}
                         onClick={() => handleVideoClick(item)}
                       >
                         {/* <iframe
@@ -282,8 +266,7 @@ export const Dashboard = () => {
                           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                           allowFullScreen
                         ></iframe> */}
-                        <div key={item.url}>
-                        </div>
+                        <div key={item.id}></div>
                       </div>
                     </div>
                   )
@@ -291,39 +274,15 @@ export const Dashboard = () => {
               }
             </div>
             <div className='w-[100%] overflow-x-auto whitespace-nowrap scroll-smooth no-scrollbar min-h-[300px] border-2 p-4 flex gap-4 cursor-pointer'>
-              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
-              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
-              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
-              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
-              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
-              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
-              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
-              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
-              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
-            </div>
-            
-            <div className='w-[100%] overflow-x-auto whitespace-nowrap scroll-smooth no-scrollbar min-h-[300px] border-2 p-4 flex gap-4 cursor-pointer'>
-              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
-              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
-              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
-              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
-              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
-              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
-              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
-              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
-              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
+              {imageGrid1}
             </div>
 
             <div className='w-[100%] overflow-x-auto whitespace-nowrap scroll-smooth no-scrollbar min-h-[300px] border-2 p-4 flex gap-4 cursor-pointer'>
-              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
-              <div className='min-w-[200px] border-2 h-full rounded-xl '></div>
-              <div className='min-w-[200px] border-2 h-full rounded-xl '></div>
-              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
-              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
-              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
-              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
-              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
-              <div className='min-w-[200px] border-2 h-full rounded-xl'></div>
+              {imageGrid2}
+            </div>
+
+            <div className='w-[100%] overflow-x-auto whitespace-nowrap scroll-smooth no-scrollbar min-h-[300px] border-2 p-4 flex gap-4 cursor-pointer'>
+              {reversedGrid}
             </div>
           </div>
         </div>
@@ -353,7 +312,7 @@ const SidebarItem: React.FC<SidebarItemType> = ({
       {(activeTab === tabName || onBlurTab === tabName) ? iconActive : iconInactive}
     </div>
     {isSidebarActive && (
-      <div className={`absolute left-18 ${ (activeTab === tabName || onBlurTab === tabName) ? 'font-bold' : ''} transition-opacity duration-300`}>
+      <div className={`absolute left-18 ${(activeTab === tabName || onBlurTab === tabName) ? 'font-bold' : ''} transition-opacity duration-300`}>
         {label}
       </div>
     )}

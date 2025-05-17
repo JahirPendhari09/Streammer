@@ -6,6 +6,7 @@ import { IoTvOutline, IoTv } from "react-icons/io5";
 import { BiSolidVideoRecording, BiVideoRecording, BiMoviePlay, BiSolidMoviePlay } from "react-icons/bi";
 import { TbCategoryFilled, TbCategory2 } from "react-icons/tb";
 import axios from 'axios';
+import { getCustomVideos } from '../../services/general';
 
 const size = 20;
 
@@ -21,14 +22,20 @@ type SidebarItemType = {
   setActiveTab: (tab: string) => void;
 };
 
-type videoDataType = {
+type VideoDataType = {
   id: number;
   label: string;
   color: string;
   url: string
 }
 
-const videos: Array<videoDataType> = [
+type ImagesDataType = {
+  id: number;
+  mal_id: string;
+  images: any;
+
+}
+const videos: Array<VideoDataType> = [
   {
     id: 1,
     label: 'A',
@@ -64,31 +71,31 @@ const videos: Array<videoDataType> = [
 
 const activeVideoIdx = 2
 
-export const Dashboard = () => {
+const Dashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('');
   const [onBlurTab, setBlurTab] = useState<string>('');
   const [isSidebarActive, setSidebarActive] = useState<boolean>(false);
-  const [activeVideo, setActiveVideo] = useState(videos)
-  const [images, setImages] = useState([])
+  const [activeVideo, setActiveVideo] = useState<VideoDataType[]>(videos)
+  const [images, setImages] = useState<ImagesDataType[]>([])
 
   const handleActiveTab = (tab: string) => {
     setActiveTab(tab)
   }
 
   const fetchPosts = async () => {
-    try {
-      const response = await axios.get('https://api.jikan.moe/v4/anime?type=movie')
-      const data = response.data.data
-      setImages(data)
-    } catch (err) {
-      console.log(err)
+    const response = await getCustomVideos()
+    if(response) {
+      setImages(response)
+    }else {
+      setImages([])
     }
   }
+
   useEffect(() => {
     fetchPosts()
   }, [])
 
-  const handleVideoClick = (item: videoDataType) => {
+  const handleVideoClick = (item: VideoDataType) => {
     const getIndex = activeVideo.indexOf(item);
     if (getIndex === activeVideoIdx) return;
 
@@ -103,19 +110,6 @@ export const Dashboard = () => {
     setActiveVideo(rotatedVideo);
   };
 
-
-  const handleNext = () => {
-    const total = activeVideo.length;
-    const updatedVideo = activeVideo.map((_, i) => activeVideo[(i + total - 1) % total]);
-    setActiveVideo(updatedVideo);
-  };
-
-  const handlePrev = () => {
-    const total = activeVideo.length;
-    const updatedVideo = activeVideo.map((_, i) => activeVideo[(i + 1) % total]);
-    setActiveVideo(updatedVideo);
-  };
-
   useEffect(() => {
     const videoChangeInterval = setInterval(() => {
       setActiveVideo((prev) => {
@@ -128,7 +122,7 @@ export const Dashboard = () => {
 
 
   const imageGrid1 = useMemo(() => (
-    images.slice(0, 10).map((image) => (
+    images.slice(0, 10).map((image: ImagesDataType) => (
       <div key={image.mal_id} className='min-w-[200px] border-2 h-full rounded-xl overflow-hidden'>
         <img src={image.images['jpg'].image_url} loading="lazy" className='w-full h-full' />
       </div>
@@ -136,7 +130,7 @@ export const Dashboard = () => {
   ), [images]);
 
   const imageGrid2 = useMemo(() => (
-    images.slice(10).map((image) => (
+    images.slice(10).map((image: ImagesDataType) => (
       <div key={image.mal_id} className='min-w-[200px] border-2 h-full rounded-xl overflow-hidden'>
         <img src={image.images['jpg'].image_url} loading="lazy" className='w-full h-full' />
       </div>
@@ -144,7 +138,7 @@ export const Dashboard = () => {
   ), [images]);
 
   const reversedGrid = useMemo(() => (
-    [...images].reverse().map((image) => (
+    [...images].reverse().map((image: ImagesDataType) => (
       <div key={image.mal_id} className='min-w-[200px] border-2 h-full rounded-xl overflow-hidden'>
         <img src={image.images['jpg'].image_url} loading="lazy" className='w-full h-full' />
       </div>
@@ -242,13 +236,13 @@ export const Dashboard = () => {
             />
           </div>
         </div>
-        <div className='w-[1300px] h-full  border-2'>
+        <div className='w-[1300px] h-full'>
           <div className='flex h-full flex-col w-full h-full gap-10 overflow-y-auto whitespace-nowrap scroll-smooth no-scrollbar'>
-            <div className='w-full h-[800px] flex justify-center items-center relative'>
+            <div className='w-full h-[800px] flex justify-center items-center relative cursor-pointer'>
               {
                 activeVideo.length > 0 && activeVideo.map((item, i) => {
                   return (
-                    <div className={`w-[300px] h-[200px] border-2 rounded-2xl overflow-hidden
+                    <div className={`w-[300px] h-[200px] rounded-2xl overflow-hidden
                       ${i === 1 ? 'left-30' : i === 3 ? 'right-30' : i === 4 ? 'right-0' : i == 0 ? 'left-0' : ''}
                       ${i === 2 ? 'z-100 left-50 w-[600px] h-[300px]' : (i === 1 || i == 3) ? 'z-50 absolute' : 'z-10 absolute'}`}
                       key={item.id}
@@ -273,15 +267,15 @@ export const Dashboard = () => {
                 })
               }
             </div>
-            <div className='w-[100%] overflow-x-auto whitespace-nowrap scroll-smooth no-scrollbar min-h-[300px] border-2 p-4 flex gap-4 cursor-pointer'>
+            <div className='w-[100%] overflow-x-auto whitespace-nowrap scroll-smooth no-scrollbar min-h-[300px] p-4 flex gap-4 cursor-pointer'>
               {imageGrid1}
             </div>
 
-            <div className='w-[100%] overflow-x-auto whitespace-nowrap scroll-smooth no-scrollbar min-h-[300px] border-2 p-4 flex gap-4 cursor-pointer'>
+            <div className='w-[100%] overflow-x-auto whitespace-nowrap scroll-smooth no-scrollbar min-h-[300px] p-4 flex gap-4 cursor-pointer'>
               {imageGrid2}
             </div>
 
-            <div className='w-[100%] overflow-x-auto whitespace-nowrap scroll-smooth no-scrollbar min-h-[300px] border-2 p-4 flex gap-4 cursor-pointer'>
+            <div className='w-[100%] overflow-x-auto whitespace-nowrap scroll-smooth no-scrollbar min-h-[300px] p-4 flex gap-4 cursor-pointer'>
               {reversedGrid}
             </div>
           </div>
@@ -290,6 +284,8 @@ export const Dashboard = () => {
     </div>
   );
 };
+
+export default Dashboard;
 
 const SidebarItem: React.FC<SidebarItemType> = ({
   onBlurTab,

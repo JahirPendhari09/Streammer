@@ -4,10 +4,13 @@ import { Provider } from 'react-redux'
 import { store } from './redux/store.ts'
 import './index.css'; // <-- Tailwind styles
 import "tailwindcss";
+import { BrowserRouter } from 'react-router-dom';
 
 
 createRoot(document.getElementById('root')!).render(
   <Provider store = {store}>
-    <App />
+    <BrowserRouter>
+     <App />
+    </BrowserRouter>
   </Provider>,
 )

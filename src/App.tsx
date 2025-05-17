@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import './App.css'
 import { io } from 'socket.io-client'
-import { Dashboard } from './view/Dashboard/Dashboard'
+import { Allroutes } from './Allroutes/Allroutes'
 // import "tailwindcss";
 
 function App() {
@@ -72,7 +72,9 @@ function App() {
         </div>
       </div>  */}
 
-      <Dashboard/>
+      {/* <Dashboard/> */}
+
+      <Allroutes/>
     </>
   )
 }

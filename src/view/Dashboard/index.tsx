@@ -1,14 +1,13 @@
-import React, { useState, ReactNode, act, useEffect, useMemo } from 'react';
+import React, { useState, ReactNode, useEffect, useMemo } from 'react';
 import { AiOutlineHome, AiFillHome } from "react-icons/ai";
 import { FaSearch, FaRunning } from "react-icons/fa";
 import { CiSearch } from "react-icons/ci";
 import { IoTvOutline, IoTv } from "react-icons/io5";
 import { BiSolidVideoRecording, BiVideoRecording, BiMoviePlay, BiSolidMoviePlay } from "react-icons/bi";
 import { TbCategoryFilled, TbCategory2 } from "react-icons/tb";
-import axios from 'axios';
 import { getCustomVideos } from '../../services/general';
-
-const size = 20;
+import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 type SidebarItemType = {
   onBlurTab: string;
@@ -77,6 +76,8 @@ const Dashboard: React.FC = () => {
   const [isSidebarActive, setSidebarActive] = useState<boolean>(false);
   const [activeVideo, setActiveVideo] = useState<VideoDataType[]>(videos)
   const [images, setImages] = useState<ImagesDataType[]>([])
+  const size = useSelector((store:any) => store.theme.size)
+
 
   const handleActiveTab = (tab: string) => {
     setActiveTab(tab)
@@ -123,8 +124,13 @@ const Dashboard: React.FC = () => {
 
   const imageGrid1 = useMemo(() => (
     images.slice(0, 10).map((image: ImagesDataType) => (
-      <div key={image.mal_id} className='min-w-[200px] border-2 h-full rounded-xl overflow-hidden'>
-        <img src={image.images['jpg'].image_url} loading="lazy" className='w-full h-full' />
+      <div key={image.mal_id} className='min-w-[200px] border-2 h-full rounded-xl overflow-hidden h-full'>
+        <img src={image.images['jpg'].image_url} loading="lazy" className='w-full h-5/6' />
+        <div className='border-2 h-full'>
+            <button className='bg-red-200 w-full h-1/6'>
+              <Link to='/player'>Play</Link>
+            </button>
+        </div>
       </div>
     ))
   ), [images]);
@@ -132,7 +138,13 @@ const Dashboard: React.FC = () => {
   const imageGrid2 = useMemo(() => (
     images.slice(10).map((image: ImagesDataType) => (
       <div key={image.mal_id} className='min-w-[200px] border-2 h-full rounded-xl overflow-hidden'>
-        <img src={image.images['jpg'].image_url} loading="lazy" className='w-full h-full' />
+        <img src={image.images['jpg'].image_url} loading="lazy" className='w-full h-5/6' />
+        <div className='border-2 h-full'>
+            <button className='bg-red-200 w-full h-1/6'>
+              <Link to='/player'>Play</Link>
+            </button>
+        </div>
+        
       </div>
     ))
   ), [images]);
@@ -140,7 +152,12 @@ const Dashboard: React.FC = () => {
   const reversedGrid = useMemo(() => (
     [...images].reverse().map((image: ImagesDataType) => (
       <div key={image.mal_id} className='min-w-[200px] border-2 h-full rounded-xl overflow-hidden'>
-        <img src={image.images['jpg'].image_url} loading="lazy" className='w-full h-full' />
+        <img src={image.images['jpg'].image_url} loading="lazy" className='w-full h-5/6' />
+        <div className='border-2 h-full'>
+            <button className='bg-red-200 w-full h-1/6'>
+              <Link to='/player'>Play</Link>
+            </button>
+        </div>
       </div>
     ))
   ), [images]);

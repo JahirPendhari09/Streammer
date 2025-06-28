@@ -26,7 +26,7 @@ const VideoMenu: React.FC = () => {
           <div className='flex h-full flex-col w-full h-full gap-4'>
             <div className='w-full h-10 flex justify-between items-center'>
               <div>Watch</div>
-              <div>0 members</div>
+              <div> 4 members</div>
             </div>
             <div className='w-full flex flex-col relative cursor-pointer'>
               <div className='w-full h-10 flex items-center'>

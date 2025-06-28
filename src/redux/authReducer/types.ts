@@ -1,6 +1,7 @@
 
 export type initialStateTypes = {
     count: number,
+    username: string
 }
 
 export type ActionTypes = {

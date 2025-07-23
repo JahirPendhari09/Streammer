@@ -35,7 +35,7 @@ const Chat = () => {
     e.preventDefault()
     if (message.trim() !== '') {
       socket.emit('message', { message, room: '1', user }); // Emit message to room '1'
-      setAllMessages((prevMessages:string) => [...prevMessages, message]);
+      // setAllMessages((prevMessages:string) => [...prevMessages, message]);
       setMessage('');
     }
 

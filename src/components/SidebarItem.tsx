@@ -15,7 +15,7 @@ export const SidebarItem: React.FC<SidebarItemType> = ({
   <div
     onMouseEnter={() => setBlurTab(tabName)}
     onMouseLeave={() => setBlurTab('')}
-    className='flex h-[60px] justify-center items-center cursor-pointer relative border-2'
+    className='flex h-[60px] justify-center items-center cursor-pointer relative'
     onClick={() => setActiveTab(tabName)}
   >
     <div className='relative flex justify-center'>

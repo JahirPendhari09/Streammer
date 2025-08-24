@@ -1,9 +1,10 @@
 
 export type VideoDataType = {
   id: number;
-  label: string;
   color: string;
-  url: string
+  url: string,
+  text: string,
+  images: Array<string>
 }
 
 export type ImagesDataType = {

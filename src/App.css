@@ -1,0 +1,19 @@
+/* width */
+::-webkit-scrollbar {
+	width: 16px;
+	height: 10px;
+	border: none;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+	background-color: rgba(102, 99, 99, 0.636);
+    background-color: transparent;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+	/* background: rgba(113, 109, 109, 0.636); */
+    background: none;
+
+}

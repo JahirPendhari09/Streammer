@@ -84,7 +84,7 @@ export const Home = () => {
     <div className='w-full h-full'>
       <div className='flex h-full flex-col w-full h-full gap-10 overflow-y-auto whitespace-nowrap scroll-smooth no-scrollbar'>
         <div className='w-full h-[800px] flex justify-center items-center relative cursor-pointer'>
-          <div className='w-full h-[500px] pl-4 mt-4'>
+          <div className='w-full h-[600px] pl-4 mt-4'>
             <div className='w-full h-full relative rounded-2xl'>
               <div className={`w-full h-full flex justify-center items-center`}>
                 <iframe

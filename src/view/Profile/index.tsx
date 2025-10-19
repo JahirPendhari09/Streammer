@@ -18,7 +18,9 @@ export const Profile = () => {
     <div className="w-full h-full">
       <div className="flex  justify-center items-center w-full h-full">
         <div className="flex flex-col justify-center items-center w-full h-full gap-4">
-          <button className="px-4 py-1 rounded-full border-1 border-gray-600 text-blue-300 ">Streaming for independent Creators</button>
+          <button className="px-4 py-1 rounded-full border-1 border-gray-600 text-blue-300 cursor-pointer hover:bg-gray-800 ">
+            Streaming for independent Creators
+          </button>
           <h1 className="text-7xl font-bold text-gray-200">New Generation Streaming Platform</h1>
           <div className="flex flex-col justify-center items-center text-2xl text-gray-400">
             <p><span className="font-bold text-gray-200"> Where every story finds its stage, </span> and greatness is an ongoing journey of revelation. </p>

@@ -42,9 +42,9 @@ export const Home = () => {
 
   const imageGrid1 = useMemo(() => (
     images.slice(0, 10).map((image: ImagesDataType) => (
-      <div key={image.mal_id} className='min-w-[200px] border-2 h-full rounded-xl overflow-hidden h-full'>
+      <div key={image.mal_id} className='min-w-[200px] h-full rounded-xl overflow-hidden h-full'>
         <img src={image.images['jpg'].image_url} loading="lazy" className='w-full h-5/6' />
-        <div className='border-2 h-full'>
+        <div className='h-full'>
           <button className='bg-red-200 w-full h-1/6'>
             <Link to='/player'>Play</Link>
           </button>
@@ -55,9 +55,9 @@ export const Home = () => {
 
   const imageGrid2 = useMemo(() => (
     images.slice(10).map((image: ImagesDataType) => (
-      <div key={image.mal_id} className='min-w-[200px] border-2 h-full rounded-xl overflow-hidden'>
+      <div key={image.mal_id} className='min-w-[200px] h-full rounded-xl overflow-hidden'>
         <img src={image.images['jpg'].image_url} loading="lazy" className='w-full h-5/6' />
-        <div className='border-2 h-full'>
+        <div className='h-full'>
           <button className='bg-red-200 w-full h-1/6'>
             <Link to='/player'>Play</Link>
           </button>
@@ -68,9 +68,9 @@ export const Home = () => {
 
   const reversedGrid = useMemo(() => (
     [...images].reverse().map((image: ImagesDataType) => (
-      <div key={image.mal_id} className='min-w-[200px] border-2 h-full rounded-xl overflow-hidden'>
+      <div key={image.mal_id} className='min-w-[200px] h-full rounded-xl overflow-hidden'>
         <img src={image.images['jpg'].image_url} loading="lazy" className='w-full h-5/6' />
-        <div className='border-2 h-full'>
+        <div className='h-full'>
           <button className='bg-red-200 w-full h-1/6'>
             <Link to='/player'>Play</Link>
           </button>

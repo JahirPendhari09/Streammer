@@ -126,8 +126,7 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
         <div className='w-[90%] h-full'>
-          {activeTab === 'home' && <Home/>}
-          {activeTab === 'profile' && <Profile/>}
+          {activeTab === 'profile' ? <Profile/> : <Home/>}
         </div>
       </div>
     </div>

@@ -1,11 +1,12 @@
-import { ActionTypes, initialStateTypes } from "./types"
+import { authStateTypes, ActionTypes } from "../types"
 
-const initialState: initialStateTypes = {
+const initialState: authStateTypes = {
     count : 0,
     username: 'abc',
+    token: '',
 }
 
-export const reducer = (state = initialState, { type, payload } :ActionTypes) => {
+export const reducer = (state = initialState, { type, payload }: ActionTypes): authStateTypes => {
     switch(type) {
         case "INCREAMENT" : {
             return {...state, count: state.count + 1}

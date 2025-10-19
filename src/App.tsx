@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react'
 import './App.css'
 import { io } from 'socket.io-client'
 import { Allroutes } from './Allroutes/Allroutes'
-// import "tailwindcss";
 
 function App() {
 

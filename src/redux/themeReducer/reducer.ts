@@ -2,7 +2,7 @@ import { SET_THEME } from "../actionTypes"
 import { ActionTypes, themeStateTypes } from "../types"
 
 const initialState: themeStateTypes = {
-    size: 20,
+    size: 22,
     theme: "dark"
 }
 

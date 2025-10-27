@@ -11,6 +11,9 @@ import { useSelector } from 'react-redux';
 import { Home } from '../Home';
 import { Profile } from '../Profile';
 import { SidebarItem } from '../../components/SidebarItem';
+import streammer_logo from "../../assest/logo.png"
+import { MdArrowForwardIos } from "react-icons/md";
+
 
 
 const Dashboard: React.FC = () => {
@@ -27,8 +30,14 @@ const Dashboard: React.FC = () => {
     <div className='bg-black h-[100vh] w-full text-white'>
       <div className=' h-full max-w-[1600px] border-1 border-neutral-500 m-auto rounded-2xl flex overflow-hidden'>
         <div className='w-[10%] h-full flex flex-col'>
-          <div className='w-full h-[100px] flex justify-center items-center'>
-            <div>Logo</div>
+          <div className='w-full flex justify-center items-center '>
+            <div className='my-10 flex flex-col items-center gap-4 cursor-pointer'>
+              <img src={streammer_logo} className='w-8 h-8 rounded-full ' />
+              <div className='flex gap-1 p-1 pl-2 text-yellow-300  text-sm bg-amber-950 rounded-2xl items-center justify-center cursor-pointer'>
+                <button >Subscribe</button>
+                <div className='pt-0.5'><MdArrowForwardIos /></div>
+              </div>
+            </div>
           </div>
           <div
             className='flex flex-col h-full w-full relative z-100'

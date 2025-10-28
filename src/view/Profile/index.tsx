@@ -4,14 +4,34 @@ import { IoMdTv } from "react-icons/io";
 import { IoTv } from "react-icons/io5";
 import { FaPlay } from "react-icons/fa";
 import { useState } from "react";
+import { IoEye, IoEyeOff } from "react-icons/io5";
+import { useSelector } from "react-redux";
+
 
 const size = 20
+const initFormData = {
+  email: '',
+  password: ''
+}
+
 export const Profile = () => {
-  const [theme, setTheme] = useState<string>("dark")
-  const [email, setEmail] = useState<string>('')
+  // const [theme, setTheme] = useState<string>("dark")
+  const theme = useSelector((store:any) => store.theme.theme)
+  const [formData, setFormData] = useState(initFormData)
+  const [stage, setStage] = useState<string>("email")
 
   const handleChange = (e:React.ChangeEvent<HTMLInputElement>) =>{
-    setEmail(e.target.value)
+    const {name ,value} = e.target
+    setFormData({...formData, [name]: value})
+  }
+
+  const handleGetStartedClick = () => {
+    setStage("password")
+  }
+
+  const handleSubmit = () => {
+    console.log('submitted')
+    console.log(formData)
   }
 
   return (
@@ -40,17 +60,111 @@ export const Profile = () => {
               <p className="mb-1">Series</p>
             </div>
           </div>
-          <div className="w-[400px] mt-4 flex justify-between px-2 py-1 bg-gray-900 rounded-full border-1 border-gray-500 text-blue-300" >
-            <input 
-              placeholder="Email address" 
-              className="outline-none w-[70%] pl-4"
-              value={email}
-              onChange={handleChange}
-            />
-            <button className=" w-[30%] bg-blue-800 text-white rounded-full px-3 py-2  cursor-pointer hover:bg-blue-900"> Get started</button>
+          <div >
+            {
+              stage === 'email' ? (
+                <EmailStage 
+                 formData={formData}
+                 handleChange={handleChange}
+                 handleSubmit={handleGetStartedClick}
+                />
+              ) : (
+                <PasswordStage 
+                  formData= {formData}
+                  handleChange= {handleChange}
+                  handleBack= {()=> setStage('email')}
+                  handleSubmit= {handleSubmit}
+                />
+              ) 
+            }
           </div>
         </div>
       </div>
     </div>
+  )
+}
+
+const EmailStage = ({formData, handleChange, handleSubmit}:any) => {
+  return <div className="w-[400px] mt-4 flex justify-between px-2 py-1 bg-gray-900 rounded-full border-1 border-gray-500 text-blue-300" >
+    <input 
+      placeholder="Email address" 
+      type="email"
+      name="email"
+      className="outline-none w-[70%] pl-4"
+      value={formData.email}
+      onChange={handleChange}
+    />
+    <button 
+      className="w-[30%] bg-blue-800 text-white rounded-full px-3 py-2  cursor-pointer hover:bg-blue-900"
+      onClick={handleSubmit}
+    > 
+      Get started
+    </button>
+  </div>
+}
+
+
+const PasswordStage = ({formData, handleChange, handleBack, handleSubmit}:any) => {
+  const [showpassword, setShowpassword] = useState<boolean>(false)
+  const handleShowPasswordClicked =() => {
+    setShowpassword(!showpassword)
+  }
+
+  return (
+  <div className="flex flex-col gap-2 w-[400px]">
+
+    <div className="flex gap-4">
+      <div className="w-[50%] mt-4 flex justify-between items-center px-2 py-1 bg-gray-900 rounded-full border-1 border-gray-500 text-blue-300">
+      <input 
+        placeholder="First Name" 
+        name= "firstName"
+        type= "text"
+        className="outline-none w-[70%] pl-4 p-2"
+        value={formData.password}
+        onChange={handleChange}
+      />
+    </div>
+    <div className="w-[50%] mt-4 flex justify-between items-center px-2 py-1 bg-gray-900 rounded-full border-1 border-gray-500 text-blue-300">
+      <input 
+        placeholder="Last Name" 
+        name= "lastName"
+        type= "text"
+        className="outline-none w-[70%] pl-4 p-2"
+        value={formData.password}
+        onChange={handleChange}
+      />
+    </div>
+    </div>
+    <div className="w-full mt-2 flex justify-between items-center px-2 py-1 bg-gray-900 rounded-full border-1 border-gray-500 text-blue-300">
+      <input 
+        placeholder="Passworod" 
+        name= "password"
+        type={showpassword ? "text": "password"}
+        className="outline-none w-[70%] pl-4 p-2"
+        value={formData.password}
+        onChange={handleChange}
+      />
+      <div   
+        className="mr-2 cursor-pointer" 
+        onClick={handleShowPasswordClicked}
+      >
+        {showpassword ? <IoEyeOff color="white" size={size}/> : <IoEye  color="white" size={size} />}
+      </div>
+    </div>
+    <div className="flex justify-between cursor-pointer mt-2">
+      <button 
+        className="w-[20%] border-1  bg-gray-900 border-gray-500 text-white rounded-full  cursor-pointer hover:bg-blue-950"
+        onClick={handleBack}
+      > 
+        Back
+      </button>
+      <button 
+        className="w-[20%] bg-green-900 border-1 border-green-700 text-white rounded-full p-2  cursor-pointer hover:bg-green-800"
+        onClick={handleSubmit}
+      > 
+        Submit
+      </button>
+    </div>
+  </div>
   )
 }

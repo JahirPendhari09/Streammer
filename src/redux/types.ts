@@ -1,14 +1,12 @@
 
 interface authReducerType {
-    count: number
 }
 
 interface chatReducerType {
-    count: number
+    
 }
 
 interface themeReducerType {
-    count: number
 }
 
 export type storeTypes = {
@@ -25,13 +23,14 @@ export type ActionTypes = {
 
 
 export type authStateTypes = {
-    count: number,
-    username: string,
+    is_authenticated? : boolean,
+    firstName: string,
+    lastName: string,
+    email: string,
     token: string
 }
 
 export type chatStateTypes = {
-    count: number,
 }
 
 export type themeStateTypes = {

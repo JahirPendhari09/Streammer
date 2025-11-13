@@ -5,17 +5,22 @@ import { IoTv } from "react-icons/io5";
 import { FaPlay } from "react-icons/fa";
 import { useState } from "react";
 import { IoEye, IoEyeOff } from "react-icons/io5";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { registerUser } from "../../services/authServices";
+import type { AppDispatch } from "../../redux/store"; // adjust path
 
 
 const size = 20
 const initFormData = {
   email: '',
-  password: ''
+  password: '',
+  firstName: '',
+  lastName: ''
 }
 
 export const Profile = () => {
-  // const [theme, setTheme] = useState<string>("dark")
+  const dispatch = useDispatch<AppDispatch>();
+  const user = useSelector((store: any) => store.auth)
   const theme = useSelector((store:any) => store.theme.theme)
   const [formData, setFormData] = useState(initFormData)
   const [stage, setStage] = useState<string>("email")
@@ -32,6 +37,7 @@ export const Profile = () => {
   const handleSubmit = () => {
     console.log('submitted')
     console.log(formData)
+    dispatch(registerUser(formData))
   }
 
   return (
@@ -120,7 +126,7 @@ const PasswordStage = ({formData, handleChange, handleBack, handleSubmit}:any) =
         name= "firstName"
         type= "text"
         className="outline-none w-[70%] pl-4 p-2"
-        value={formData.password}
+        value={formData.firstName}
         onChange={handleChange}
       />
     </div>
@@ -130,7 +136,7 @@ const PasswordStage = ({formData, handleChange, handleBack, handleSubmit}:any) =
         name= "lastName"
         type= "text"
         className="outline-none w-[70%] pl-4 p-2"
-        value={formData.password}
+        value={formData.lastName}
         onChange={handleChange}
       />
     </div>

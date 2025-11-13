@@ -1,21 +1,21 @@
+import { LOGIN_USER_SUCCESS, LOGOUT_USER_SUCCESS,  } from "../actionTypes"
 import { authStateTypes, ActionTypes } from "../types"
 
 const initialState: authStateTypes = {
-    count : 0,
-    username: 'abc',
+    is_authenticated: false,
+    firstName: '',
+    lastName: '',
+    email: '',
     token: '',
 }
 
 export const reducer = (state = initialState, { type, payload }: ActionTypes): authStateTypes => {
     switch(type) {
-        case "INCREAMENT" : {
-            return {...state, count: state.count + 1}
+        case LOGIN_USER_SUCCESS : {
+            return {...state, ...payload}
         }
-        case "DECREAMENT" : {
-            return {...state, count: state.count - 1}
-        }
-        case "SET_USER" : {
-            return {...state, username: payload.username}
+        case LOGOUT_USER_SUCCESS : {
+            return initialState
         }
         default: {
             return state

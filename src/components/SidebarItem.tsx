@@ -22,7 +22,7 @@ export const SidebarItem: React.FC<SidebarItemType> = ({
       {(activeTab === tabName || onBlurTab === tabName) ? iconActive : iconInactive}
       {isSidebarActive && (
         <span
-          className={`absolute left-[32px] text-xl transition-opacity duration-300
+          className={`absolute left-[32px] text transition-opacity duration-300
           ${(activeTab === tabName || onBlurTab === tabName) ? 'font-bold' : ''} `}
         > {label} </span>
       )}

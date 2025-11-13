@@ -34,7 +34,7 @@ const Dashboard: React.FC = () => {
             <div className='my-10 flex flex-col items-center gap-4 cursor-pointer'>
               <img src={streammer_logo} className='w-8 h-8 rounded-full ' />
               <div className='flex gap-1 p-1 pl-2 text-yellow-300  text-sm bg-amber-950 rounded-2xl items-center justify-center cursor-pointer'>
-                <button >Subscribe</button>
+                <button className='cursor-pointer'>Subscribe</button>
                 <div className='pt-0.5'><MdArrowForwardIos /></div>
               </div>
             </div>

@@ -10,3 +10,6 @@ export const SET_SIZE = "SET_SIZE";
 export const LOGOUT_USER_SUCCESS = "LOGOUT_USER_SUCCESS";
 export const LOGIN_USER_SUCCESS = "LOGIN_USER_SUCCESS";
 export const REGISTER_USER_SUCCESS = "REGISTER_USER_SUCCESS";
+
+// chat action types
+export const SET_ONLINE_USERS = "SET_ONLINE_USERS"

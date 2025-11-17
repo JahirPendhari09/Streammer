@@ -38,7 +38,7 @@ const Chat = () => {
       // setAllMessages((prevMessages:string) => [...prevMessages, message]);
       setMessage('');
     }
-
+    
   }
 
   return (

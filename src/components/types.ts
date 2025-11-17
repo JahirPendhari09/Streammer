@@ -11,3 +11,9 @@ export type SidebarItemType = {
   activeTab: string;
   setActiveTab: (tab: string) => void;
 };
+
+export interface ModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  children: ReactNode;
+}

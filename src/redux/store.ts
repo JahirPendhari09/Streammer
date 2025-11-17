@@ -1,5 +1,7 @@
 import { applyMiddleware, combineReducers, legacy_createStore } from "redux";
-import thunk, { ThunkMiddleware } from "redux-thunk"; 
+import { ThunkMiddleware } from "redux-thunk"; 
+import { thunk } from 'redux-thunk';
+
 import { reducer as authReducer } from "./authReducer/reducer";
 import { reducer as chatReducer } from "./chatReducer/reducer";
 import { reducer as themeReducer } from "./themeReducer/reducer";

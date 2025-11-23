@@ -6,8 +6,9 @@ import { FaPlay } from "react-icons/fa";
 import { useState } from "react";
 import { IoEye, IoEyeOff } from "react-icons/io5";
 import { useDispatch, useSelector } from "react-redux";
-import { registerUser } from "../../services/authServices";
+import { loginUser, registerUser } from "../../services/authServices";
 import type { AppDispatch } from "../../redux/store"; // adjust path
+import { Navigate } from "react-router-dom";
 
 
 const size = 20
@@ -31,13 +32,17 @@ export const Profile = () => {
   }
 
   const handleGetStartedClick = () => {
-    setStage("password")
+    // setStage("password")
+    dispatch(loginUser(formData))
+
   }
 
   const handleSubmit = () => {
-    console.log('submitted')
-    console.log(formData)
     dispatch(registerUser(formData))
+  }
+
+  if(user.auth) {
+    return <Navigate to="/" />
   }
 
   return (

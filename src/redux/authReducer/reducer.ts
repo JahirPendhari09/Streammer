@@ -3,6 +3,7 @@ import { authStateTypes, ActionTypes } from "../types"
 
 const initialState: authStateTypes = {
     is_authenticated: false,
+    _id: '',
     firstName: '',
     lastName: '',
     email: '',
@@ -12,7 +13,7 @@ const initialState: authStateTypes = {
 export const reducer = (state = initialState, { type, payload }: ActionTypes): authStateTypes => {
     switch(type) {
         case LOGIN_USER_SUCCESS : {
-            return {...state, ...payload}
+            return {...state, ...payload, is_authenticated: true}
         }
         case LOGOUT_USER_SUCCESS : {
             return initialState

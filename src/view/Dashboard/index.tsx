@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { use, useEffect, useState } from 'react';
 import { AiOutlineHome, AiFillHome } from "react-icons/ai";
 import { FaSearch, FaRunning } from "react-icons/fa";
 import { CiSearch } from "react-icons/ci";
@@ -7,16 +7,18 @@ import { BiSolidVideoRecording, BiVideoRecording, BiMoviePlay, BiSolidMoviePlay 
 import { TbCategoryFilled, TbCategory2 } from "react-icons/tb";
 import { FaRegUser, FaUser  } from "react-icons/fa6";
 
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Home } from '../Home';
 import { Profile } from '../Profile';
 import { SidebarItem } from '../../components/SidebarItem';
 import streammer_logo from "../../assest/logo.png"
 import { MdArrowForwardIos } from "react-icons/md";
+import { LOGIN_USER_SUCCESS } from '../../redux/actionTypes';
 
 
 
 const Dashboard: React.FC = () => {
+  const dispatch = useDispatch()
   const [activeTab, setActiveTab] = useState<string>('home');
   const [onBlurTab, setBlurTab] = useState<string>('');
   const [isSidebarActive, setSidebarActive] = useState<boolean>(false);
@@ -25,6 +27,13 @@ const Dashboard: React.FC = () => {
   const handleActiveTab = (tab: string) => {
     setActiveTab(tab)
   }
+
+  useEffect(() => {
+    const user = localStorage.getItem('user') || undefined 
+    if(user) {
+      dispatch({ type: LOGIN_USER_SUCCESS, payload: JSON.parse(user)})
+    }
+  }, [])
 
   return (
     <div className='bg-black h-[100vh] w-full text-white'>

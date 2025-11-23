@@ -10,7 +10,15 @@ export const loginUser =  (data: LoginData) => async (dispatch: any) => {
     try{
         dispatch({type: LOADING})
         const response = await axios.post(`${baseUrl}/auth/login`, data)
-        dispatch({ type: LOGIN_USER_SUCCESS, payload: response.data})
+        const user = {
+            token : response.data.token,
+            firstName: response.data.user.firstName,
+            lastName: response.data.user.lastName,
+            email: response.data.user.email,
+            _id: response.data.user._id
+        }
+        localStorage.setItem('user', JSON.stringify(user))
+        dispatch({ type: LOGIN_USER_SUCCESS, payload: user})
         return response.data
         
     }catch(err) {

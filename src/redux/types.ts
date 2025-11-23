@@ -23,6 +23,7 @@ export type ActionTypes = {
 
 
 export type authStateTypes = {
+    _id: string,
     is_authenticated? : boolean,
     firstName: string,
     lastName: string,

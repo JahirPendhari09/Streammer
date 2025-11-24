@@ -13,3 +13,5 @@ export const REGISTER_USER_SUCCESS = "REGISTER_USER_SUCCESS";
 
 // chat action types
 export const SET_ONLINE_USERS = "SET_ONLINE_USERS"
+export const SET_GROUP_CHAT = "SET_GROUP_CHAT"
+export const SET_GROUP_CHAT_ONLOAD = "SET_GROUP_CHAT_ONLOAD"

@@ -1,4 +1,5 @@
 import axios from "axios";
+import { ERROR, LOADING, SET_GROUP_CHAT_ONLOAD } from "../redux/actionTypes";
 
 const moviesBaseUrl = import.meta.env.VITE_DUMMY_MOVIES_URL;
 
@@ -19,13 +20,15 @@ export const getCustomVideos = async () => {
 };
 
 
-export const getGroupChat = async () => {
-  const group_name = 'test';
+export const getGroupChat = (group_name:string) =>  async( dispatch: any)=> {
   try {
+    dispatch({type: LOADING})
     const response = await axios.get(`${baseUrl}/chat/messages/${group_name}`);
-    return response.data;
+    dispatch({type: SET_GROUP_CHAT_ONLOAD, payload: response.data})
+    return response.data
   } catch (err) {
     console.error("Error while getting Videos:", err);
+    dispatch({type: ERROR})
     return null;
   }
 }

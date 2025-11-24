@@ -1,45 +1,47 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { BiSolidSend } from "react-icons/bi";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { io } from 'socket.io-client'
 import { getGroupChat } from "../../services/general";
+import { MdDelete } from "react-icons/md";
+import { SET_GROUP_CHAT } from "../../redux/actionTypes";
 
 const Chat = () => {
-
+  const dispatch = useDispatch()
   const [message, setMessage] = useState<string>('')
-  const [allMessages, setAllMessages] = useState<any>([])
   const bottomRef = useRef<any>(null);
   const user = useSelector((store:any) => store.auth)
+  const { chat, isGroupChatLoad, group }  = useSelector((store: any) => store.chat)
 
-  const socket:any = useMemo( () => io('http://localhost:8080'), [] )
+  const socket:any = useMemo(() => io('http://localhost:8080'), [] )
 
-  const fetchGroupChat =  async() => {
-    try{
-      const chat = await getGroupChat()
-      setAllMessages(chat)
-    }catch(err) {
-      console.log("Error", err)
-    }
-  }
   useEffect(() => {
     socket.emit("join-group", "test");
-    fetchGroupChat();
+    if(!isGroupChatLoad) {
+      dispatch(getGroupChat(group))
+    }
   }, [])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [allMessages]);
+  }, [chat]);
 
 
   useEffect(() => {
     socket.on("connect", () => {
-      console.log("connected");
       socket.emit("join-group", "test");
     });
 
     socket.on("receive_message", (data: any) => {
-      setAllMessages((prev: any) => [...prev, data]);
+      // setAllMessages((prev: any) => [...prev, data]);
+      dispatch({type:SET_GROUP_CHAT, payload: [...chat, data]})
     });
+
+    socket.on("user_message_deleted", (data: any) => {
+      const updatedChat = chat.filter((msg: any) => msg._id !== data.id)
+      dispatch({type:SET_GROUP_CHAT, payload: updatedChat })
+    });
+
 
     return () => {
       socket.off("receive_message");
@@ -50,7 +52,7 @@ const Chat = () => {
   const handleSubmit = (e:any) => {
     e.preventDefault()
     if (message.trim() !== '') {
-      socket.emit('message', { message, group: 'test', user }); // Emit message to room '1'
+      socket.emit('message', { message, group: 'test', user });
       // setAllMessages((prevMessages:string) => [...prevMessages, message]);
       setMessage('');
     } 
@@ -61,20 +63,25 @@ const Chat = () => {
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true });
   };
 
+  const deleteMessageClick = (message: any) => {
+    socket.emit("message_delete", { id: message._id, group: "test" });
+  };
 
   return (
     <div className='w-full h-full border-2 rounded-xl overflow-hidden flex flex-col relative'>
       <div className="w-[290px] m-auto h-full overflow-y-scroll text-white no-scrollbar mb-16">
-        <div className="pt-4 flex flex-col">
-          {allMessages.length > 0 && allMessages.map((message: any, index: number) => {
+        <div className="pt-4 flex flex-col gap-2">
+          {chat.length > 0 && chat.map((message: any, index: number) => {
             const isMe = message.sender?._id === user._id;
-
             return (
               <div
                 key={index}
                 className={`w-full flex ${isMe ? "justify-end" : "justify-start"} mb-1`}
               >
-                <div className={`px-3 py-2 rounded-lg max-w-[80%] ${isMe ? "bg-green-600 text-white" : "bg-gray-700 text-white"}`}>
+                <div className={`px-3 pt-4 py-2 relative rounded-lg border min-w-[80px] max-w-[80%] ${isMe ? "bg-green-600 text-white" : "bg-gray-700 text-white"}`}>
+                  { isMe && <span className="absolute right-1 top-1" onClick={()=> deleteMessageClick(message)}>
+                    <MdDelete size={16} color="lightblue"/>
+                  </span> }
                   <p>{message.message}</p>
                   <span className="text-[10px] text-gray-300 float-right block mt-1">
                     {formatTime(message.createdAt)}

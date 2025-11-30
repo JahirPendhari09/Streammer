@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { act, useEffect, useState } from 'react';
 import { AiOutlineHome, AiFillHome } from "react-icons/ai";
 import { FaSearch, FaRunning } from "react-icons/fa";
 import { CiSearch } from "react-icons/ci";
@@ -15,6 +15,8 @@ import streammer_logo from "../../assest/logo.png"
 import { MdArrowForwardIos } from "react-icons/md";
 import { LOGIN_USER_SUCCESS } from '../../redux/actionTypes';
 import Notifications  from '../Notifications/';
+import { Room } from '../Room';
+import { Search } from '../Search';
 
 const Dashboard: React.FC = () => {
   const dispatch = useDispatch()
@@ -80,12 +82,12 @@ const Dashboard: React.FC = () => {
               isSidebarActive={isSidebarActive}
               iconActive={<IoTv size={size} />}
               iconInactive={<IoTvOutline color='gray' size={size} />}
-              label='TV'
-              tabName='tv-show'
+              label='Room'
+              tabName='room'
               activeTab={activeTab}
               setActiveTab={handleActiveTab}
             />
-            <SidebarItem
+            {/* <SidebarItem
               onBlurTab={onBlurTab}
               setBlurTab={setBlurTab}
               isSidebarActive={isSidebarActive}
@@ -117,7 +119,7 @@ const Dashboard: React.FC = () => {
               tabName='sparks'
               activeTab={activeTab}
               setActiveTab={handleActiveTab}
-            />
+            /> */}
             <SidebarItem
               onBlurTab={onBlurTab}
               setBlurTab={setBlurTab}
@@ -143,8 +145,11 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
         <div className='w-[90%] h-full'>
-          {activeTab === 'profile' ? <Profile/> : activeTab === 'notifications' ? <Notifications/> : <Home/>}
-          {}
+          {activeTab === 'home' && <Home/>}
+          {activeTab === 'search' && <Search/>}
+          {activeTab === 'notifications' && <Notifications/>}
+          {activeTab === 'room' && <Room/>}
+          {activeTab === 'profile' && <Profile/>}
         </div>
       </div>
     </div>

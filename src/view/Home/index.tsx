@@ -45,7 +45,7 @@ export const Home = () => {
       <div key={image.mal_id} className='min-w-[200px] h-full rounded-xl overflow-hidden h-full'>
         <img src={image.images['jpg'].image_url} loading="lazy" className='w-full h-5/6' />
         <div className='h-full'>
-          <button className='bg-red-200 w-full h-1/6'>
+          <button className='bg-red-200 w-full h-1/6 cursor-pointer'>
             <Link to='/player'>Play</Link>
           </button>
         </div>
@@ -58,7 +58,7 @@ export const Home = () => {
       <div key={image.mal_id} className='min-w-[200px] h-full rounded-xl overflow-hidden'>
         <img src={image.images['jpg'].image_url} loading="lazy" className='w-full h-5/6' />
         <div className='h-full'>
-          <button className='bg-red-200 w-full h-1/6'>
+          <button className='bg-red-200 w-full h-1/6 cursor-pointer'>
             <Link to='/player'>Play</Link>
           </button>
         </div>
@@ -71,7 +71,7 @@ export const Home = () => {
       <div key={image.mal_id} className='min-w-[200px] h-full rounded-xl overflow-hidden'>
         <img src={image.images['jpg'].image_url} loading="lazy" className='w-full h-5/6' />
         <div className='h-full'>
-          <button className='bg-red-200 w-full h-1/6'>
+          <button className='bg-red-200 w-full h-1/6 cursor-pointer'>
             <Link to='/player'>Play</Link>
           </button>
         </div>

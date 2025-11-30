@@ -1,11 +1,11 @@
-import React, { use, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AiOutlineHome, AiFillHome } from "react-icons/ai";
 import { FaSearch, FaRunning } from "react-icons/fa";
 import { CiSearch } from "react-icons/ci";
 import { IoTvOutline, IoTv } from "react-icons/io5";
 import { BiSolidVideoRecording, BiVideoRecording, BiMoviePlay, BiSolidMoviePlay } from "react-icons/bi";
-import { TbCategoryFilled, TbCategory2 } from "react-icons/tb";
 import { FaRegUser, FaUser  } from "react-icons/fa6";
+import { IoMdNotificationsOutline, IoMdNotifications  } from "react-icons/io";
 
 import { useDispatch, useSelector } from 'react-redux';
 import { Home } from '../Home';
@@ -14,8 +14,7 @@ import { SidebarItem } from '../../components/SidebarItem';
 import streammer_logo from "../../assest/logo.png"
 import { MdArrowForwardIos } from "react-icons/md";
 import { LOGIN_USER_SUCCESS } from '../../redux/actionTypes';
-
-
+import Notifications  from '../Notifications/';
 
 const Dashboard: React.FC = () => {
   const dispatch = useDispatch()
@@ -31,7 +30,7 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     const user = localStorage.getItem('user') || undefined 
     if(user) {
-      dispatch({ type: LOGIN_USER_SUCCESS, payload: JSON.parse(user)})
+      dispatch({ type: LOGIN_USER_SUCCESS, payload: JSON.parse(user)})   
     }
   }, [])
 
@@ -123,10 +122,10 @@ const Dashboard: React.FC = () => {
               onBlurTab={onBlurTab}
               setBlurTab={setBlurTab}
               isSidebarActive={isSidebarActive}
-              iconActive={<TbCategoryFilled size={size} />}
-              iconInactive={<TbCategory2 color='gray' size={size} />}
-              label='Categories'
-              tabName='categories'
+              iconActive={<IoMdNotifications  size={size} />}
+              iconInactive={<IoMdNotificationsOutline color='gray' size={size} />}
+              label='Notifications'
+              tabName='notifications'
               activeTab={activeTab}
               setActiveTab={handleActiveTab}
             />
@@ -144,7 +143,8 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
         <div className='w-[90%] h-full'>
-          {activeTab === 'profile' ? <Profile/> : <Home/>}
+          {activeTab === 'profile' ? <Profile/> : activeTab === 'notifications' ? <Notifications/> : <Home/>}
+          {}
         </div>
       </div>
     </div>

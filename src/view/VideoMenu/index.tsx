@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { IoIosArrowBack, IoIosNotifications, IoIosNotificationsOff } from "react-icons/io";
 import { IoSettingsOutline } from "react-icons/io5";
@@ -11,16 +11,20 @@ import { Modal } from '../../components/Modal';
 import { OnlineUsersProps } from './types';
 import { LuSend } from "react-icons/lu";
 import { RiRadioButtonLine } from "react-icons/ri";
+import { getGroupChat, loadJoinedMembers } from '../../services/general';
+import { io } from 'socket.io-client';
 
 
 const VideoMenu: React.FC = () => {
   const  dispatch = useDispatch<AppDispatch>()
   const [activeTab, setActiveTab] = useState<string>('video')
   const [isNotificationShow, setNotificationShow] = useState<boolean>(true)
-  const  [isOnlineUsersModalOpen, setOnlineUsersModalOpen] = useState<boolean>(false)
+  const [isOnlineUsersModalOpen, setOnlineUsersModalOpen] = useState<boolean>(false)
   const size = useSelector((store:any) => store.theme.size)
-  const onlineUsers = useSelector((store:any) => store.chat.onlineUsers)
-  
+  const {onlineUsers, joinedPeoples, group, isLoad } = useSelector((store:any) => store.chat)
+  const user = useSelector((store:any) => store.auth)
+  const socket:any = useMemo(() => io('http://localhost:8080'), [] )
+
   const handleNotificationClick = () => {
     setNotificationShow(!isNotificationShow)
   }
@@ -29,16 +33,38 @@ const VideoMenu: React.FC = () => {
     setActiveTab(value)
   }
 
+  useEffect(() => {
+    if(!isLoad) {
+      dispatch(getGroupChat(group))
+    }
+  }, [])
+
+  useEffect(() => {
+    if (user?._id) {
+      socket.emit("join_user", user._id);   //  this is required
+      console.log("Joined personal notification room:", user._id);
+    }
+  }, [user]);
+
+
+
   const handleOnlineUsersModalClick = () =>{
     setOnlineUsersModalOpen(!isOnlineUsersModalOpen)
   }
 
   useEffect(() => {
     dispatch(getAllUsers())
+    dispatch(loadJoinedMembers(group))
   }, [])
 
-  const handleJoinRequestClick = () => {
-    alert('Join request sent!')
+  const handleJoinRequestClick = (data) => {
+    socket.emit("send_notification",{
+      senderId: user._id,
+      receiverId: data._id,
+      message:"A new message arrived",
+      type:"message",
+      link:"/chat/987"
+    })
   }
 
   return (
@@ -78,7 +104,7 @@ const VideoMenu: React.FC = () => {
                   <div className='h-full w-full border-2 rounded-xl'></div>
                 </div>
                 <div className='w-[25%] h-full'>
-                  { activeTab === 'video' ? <Members/> : <Chat/> }
+                  { activeTab === 'video' ? <Members peoples= {joinedPeoples} /> : <Chat/> }
                 </div>
               </div>          
             </div>
@@ -86,19 +112,16 @@ const VideoMenu: React.FC = () => {
         </div>
       </div>
       <Modal isOpen={isOnlineUsersModalOpen} onClose={handleOnlineUsersModalClick}> 
-        <div className='w-[400px] '>
+        <div className='w-[300px] '>
           <h3 className='text-center text-2xl'>Online Members</h3>
           <div className='mt-4 '>
-
-          { onlineUsers.length > 0 && onlineUsers.map((user:OnlineUsersProps) => {
-            return <div key={user._id} className='flex gap-6 justify-center items-center my-2 '>
-               <p> <RiRadioButtonLine  color="green"/></p>
-               <p>{user.firstName}</p>
-               <p>{user.lastName}</p>
-               <div className='cursor-pointer' onClick={handleJoinRequestClick}><LuSend /></div>
-              </div>
-          })}
-          {onlineUsers.length === 0 && <p className='text-center p-8'> No members online</p>}
+            { onlineUsers.length > 0 && onlineUsers.map((onlineUser:OnlineUsersProps) => {
+              const isMe = onlineUser?._id === user._id;
+              return ( 
+                !isMe && <OnlineMenu onlineUser={onlineUser} onClick = {handleJoinRequestClick}/>
+              )
+            })}
+            {onlineUsers.length === 0 && <p className='text-center p-8'> No members online</p>}
           </div>
         </div>
       </Modal>
@@ -107,3 +130,18 @@ const VideoMenu: React.FC = () => {
 };
 
 export default VideoMenu;
+
+const OnlineMenu = ({onlineUser, onClick}:any) => {
+  return (
+    <div key={onlineUser._id} className='w-full border flex items-center gap-6 justify-between items-center my-2 '>
+      <div className='flex gap-6 items-center'>
+        <p> <RiRadioButtonLine  color="green"/></p>
+        <div className='flex gap-4'>
+          <p>{onlineUser.firstName}</p>
+          <p>{onlineUser.lastName}</p>
+        </div>
+      </div>
+      <div className='cursor-pointer' onClick={() => onClick(onlineUser)}><LuSend /></div>
+      </div> 
+  )
+}

@@ -11,17 +11,11 @@ const Chat = () => {
   const [message, setMessage] = useState<string>('')
   const bottomRef = useRef<any>(null);
   const user = useSelector((store:any) => store.auth)
-  const { chat, isGroupChatLoad, group }  = useSelector((store: any) => store.chat)
+  const { chat, isLoad, group }  = useSelector((store: any) => store.chat)
 
   const socket:any = useMemo(() => io('http://localhost:8080'), [] )
 
-  useEffect(() => {
-    socket.emit("join-group", "test");
-    if(!isGroupChatLoad) {
-      dispatch(getGroupChat(group))
-    }
-  }, [])
-
+  
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chat]);
@@ -41,6 +35,12 @@ const Chat = () => {
       const updatedChat = chat.filter((msg: any) => msg._id !== data.id)
       dispatch({type:SET_GROUP_CHAT, payload: updatedChat })
     });
+
+    socket.on("receive_notification",(noti:any)=>{
+      // dispatch({type:SET_GROUP_CHAT, payload: [...chat, data]})
+      console.log("Notification Received:",noti)
+    })
+
 
 
     return () => {

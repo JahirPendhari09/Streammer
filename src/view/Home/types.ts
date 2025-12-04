@@ -4,7 +4,7 @@ export type VideoDataType = {
   color: string;
   url: string,
   text: string,
-  images: Array<string>
+  poster: string
 }
 
 export type ImagesDataType = {

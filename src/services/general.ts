@@ -8,14 +8,11 @@ const baseUrl =  'http://localhost:8080';
 
 export const getCustomVideos = async () => {
   try {
-    const response = await axios.get(`${moviesBaseUrl}/v4/anime?type=movie`);
-    if (response.data) {
-      return response.data.data;
-    }
-    return response;
+    const res = await fetch(`${baseUrl}/videos/list`);
+    return await res.json();
   } catch (err) {
-    console.error("Error while getting Videos:", err);
-    return null;
+    console.log("Error fetching videos", err);
+    return [];
   }
 };
 

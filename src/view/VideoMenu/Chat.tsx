@@ -5,6 +5,7 @@ import { io } from 'socket.io-client'
 import { getGroupChat } from "../../services/general";
 import { MdDelete } from "react-icons/md";
 import { SET_GROUP_CHAT } from "../../redux/actionTypes";
+import { useSocket } from "../../context/SocketContext";
 
 const Chat = () => {
   const dispatch = useDispatch()
@@ -13,41 +14,40 @@ const Chat = () => {
   const user = useSelector((store:any) => store.auth)
   const { chat, isLoad, group }  = useSelector((store: any) => store.chat)
 
-  const socket:any = useMemo(() => io('http://localhost:8080'), [] )
-
-  
+  const socket = useSocket()
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chat]);
 
 
   useEffect(() => {
-    socket.on("connect", () => {
-      socket.emit("join-group", "test");
-    });
+    if (!socket) return;
 
-    socket.on("receive_message", (data: any) => {
-      // setAllMessages((prev: any) => [...prev, data]);
-      dispatch({type:SET_GROUP_CHAT, payload: [...chat, data]})
-    });
+    socket.emit("join-group", "test");
 
-    socket.on("user_message_deleted", (data: any) => {
-      const updatedChat = chat.filter((msg: any) => msg._id !== data.id)
-      dispatch({type:SET_GROUP_CHAT, payload: updatedChat })
-    });
+    const onReceiveMessage = (data: any) => {
+      dispatch({
+        type: SET_GROUP_CHAT,
+        payload: [...chat, data],
+      });
+    };
 
-    socket.on("receive_notification",(noti:any)=>{
-      // dispatch({type:SET_GROUP_CHAT, payload: [...chat, data]})
-      console.log("Notification Received:",noti)
-    })
+    const onDelete = (data: any) => {
+      dispatch({
+        type: SET_GROUP_CHAT,
+        payload: chat.filter((msg: any) => msg._id !== data.id),
+      });
+    };
 
-
+    socket.on("receive_message", onReceiveMessage);
+    socket.on("user_message_deleted", onDelete);
 
     return () => {
-      socket.off("receive_message");
-      socket.disconnect();
+      socket.off("receive_message", onReceiveMessage);
+      socket.off("user_message_deleted", onDelete);
     };
-  }, []);
+  }, [socket, chat]);
+
   
   const handleSubmit = (e:any) => {
     e.preventDefault()

@@ -52,7 +52,7 @@ export const Search = () => {
             </div>
 
             <h3 className="mt-2 text-sm text-gray-300 truncate group-hover:text-white transition">
-              {video.displayName || video.name.replace(/_/g, " ").replace(".mp4", "")}
+              {video.name}
             </h3>
           </Link>
         ))}

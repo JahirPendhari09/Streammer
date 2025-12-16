@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import { IoIosArrowBack, IoIosNotifications, IoIosNotificationsOff } from "react-icons/io";
 import { IoSettingsOutline } from "react-icons/io5";
 import { useDispatch, useSelector } from 'react-redux';
@@ -11,19 +11,40 @@ import { Modal } from '../../components/Modal';
 import { OnlineUsersProps } from './types';
 import { LuSend } from "react-icons/lu";
 import { RiRadioButtonLine } from "react-icons/ri";
-import { getGroupChat, loadJoinedMembers } from '../../services/general';
-import { io } from 'socket.io-client';
+import { getCustomVideos, getGroupChat, loadJoinedMembers } from '../../services/general';
+import { VideoDataType } from '../Home/types';
+import mediasoupService from "./MediasoupClient";
+import { useSocket } from '../../context/SocketContext';
 
 
 const VideoMenu: React.FC = () => {
+  const { roomId } = useParams();
   const  dispatch = useDispatch<AppDispatch>()
   const [activeTab, setActiveTab] = useState<string>('video')
   const [isNotificationShow, setNotificationShow] = useState<boolean>(true)
   const [isOnlineUsersModalOpen, setOnlineUsersModalOpen] = useState<boolean>(false)
   const size = useSelector((store:any) => store.theme.size)
-  const {onlineUsers, joinedPeoples, group, isLoad } = useSelector((store:any) => store.chat)
+  const {onlineUsers, group, isLoad } = useSelector((store:any) => store.chat)
   const user = useSelector((store:any) => store.auth)
-  const socket:any = useMemo(() => io('http://localhost:8080'), [] )
+
+  const [peers, setPeers] = useState(new Map());
+
+  const [cameraStream, setCameraStream] = useState(null);
+  const [micStream, setMicStream] = useState(null);
+  const [screenStream, setScreenStream] = useState(null);
+
+  const [cameraOn, setCameraOn] = useState(false);
+  const [micOn, setMicOn] = useState(false);
+  const [isScreenSharing, setIsScreenSharing] = useState(false);
+
+  const [videos, setVideos] = useState<VideoDataType[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const [screenSharingPeerId, setScreenSharingPeerId] = useState(null);
+  const [joined, setJoined] = useState(false);
+  const [isJoining, setIsJoining] = useState(false);
+  const socket = useSocket();
+
 
   const handleNotificationClick = () => {
     setNotificationShow(!isNotificationShow)
@@ -41,7 +62,7 @@ const VideoMenu: React.FC = () => {
 
   useEffect(() => {
     if (user?._id) {
-      socket.emit("join_user", user._id);   //  this is required
+      socket.emit("join_user", user._id);  
       console.log("Joined personal notification room:", user._id);
     }
   }, [user]);
@@ -67,14 +88,244 @@ const VideoMenu: React.FC = () => {
     })
   }
 
+  
+    useEffect(() => {
+      (async () => {
+        const response = await getCustomVideos();
+        setVideos(response);
+      })();
+    }, []);
+  
+    // Filter videos
+    const filteredVideos = videos.filter((video) =>
+      video.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+
+  const joinRoom = useCallback(async () => {
+    if (!socket || joined || isJoining) return;
+    setIsJoining(true);
+
+    socket.emit(
+      "join-room",
+      { roomId, userData: { name: "User" } },
+      async (data) => {
+        if (data?.error) {
+          alert(data.error);
+          setIsJoining(false);
+          return;
+        }
+
+        await mediasoupService.init(socket, data.rtpCapabilities);
+
+        await mediasoupService.createSendTransport();
+        await mediasoupService.createRecvTransport();
+
+        setJoined(true);
+        setIsJoining(false);
+
+        if (data.peers) {
+          setPeers(() => {
+            const map = new Map();
+            data.peers.forEach((peerId) => {
+              map.set(peerId, {
+                peerId,
+                cameraOn: false,
+                micOn: false,
+                videoStream: null,
+                audioStream: null,
+                screenStream: null,
+              });
+            });
+            return map;
+          });
+        }
+
+        if (data.screenSharingPeer) {
+          setScreenSharingPeerId(data.screenSharingPeer);
+        }
+      }
+    );
+  }, [socket, joined, isJoining, roomId]);
+
+  useEffect(() => {
+    joinRoom();
+  }, [joinRoom]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.on("peer-joined", ({ peerId }) => {
+      setPeers((prev) => {
+        const map = new Map(prev);
+        map.set(peerId, {
+          peerId,
+          cameraOn: false,
+          micOn: false,
+          videoStream: null,
+          audioStream: null,
+          screenStream: null,
+        });
+        return map;
+      });
+    });
+
+    socket.on("peer-left", ({ peerId }) => {
+      setPeers((prev) => {
+        const map = new Map(prev);
+        map.delete(peerId);
+        return map;
+      });
+
+      if (screenSharingPeerId === peerId) {
+        setScreenSharingPeerId(null);
+      }
+    });
+
+    socket.on("new-producer", async ({ peerId, producerId, kind, appData }) => {
+      const { consumer, appData: consumerData } =
+        await mediasoupService.consume(producerId);
+
+      const stream = new MediaStream([consumer.track]);
+
+      setPeers((prev) => {
+        const map = new Map(prev);
+        const peer = map.get(peerId);
+
+        if (!peer) return prev;
+
+        if (consumerData?.screen) {
+          peer.screenStream = stream;
+        } else if (kind === "video") {
+          peer.videoStream = stream;
+          peer.cameraOn = true;
+        } else if (kind === "audio") {
+          peer.audioStream = stream;
+          peer.micOn = true;
+        }
+
+        map.set(peerId, { ...peer });
+        return map;
+      });
+    });
+
+    socket.on("consumer-closed", ({ consumerId }) => {
+      const consumer = mediasoupService.getConsumer(consumerId);
+      if (!consumer) return;
+
+      const kind = consumer.track.kind;
+
+      setPeers((prev) => {
+        const map = new Map(prev);
+        for (const peer of map.values()) {
+          if (kind === "video") {
+            peer.cameraOn = false;
+            peer.videoStream = null;
+          }
+          if (kind === "audio") {
+            peer.micOn = false;
+            peer.audioStream = null;
+          }
+        }
+        return map;
+      });
+
+      mediasoupService.closeConsumer(consumerId);
+    });
+
+    socket.on("screen-share-started", ({ peerId }) =>
+      setScreenSharingPeerId(peerId)
+    );
+
+    socket.on("screen-share-stopped", () => setScreenSharingPeerId(null));
+
+    return () => {
+      socket.off("peer-joined");
+      socket.off("peer-left");
+      socket.off("new-producer");
+      socket.off("consumer-closed");
+      socket.off("screen-share-started");
+      socket.off("screen-share-stopped");
+    };
+  }, [socket, screenSharingPeerId]);
+
+
+  const toggleCamera = async () => {
+    if (!joined) return;
+
+    if (!cameraOn) {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: 640, height: 360 },
+      });
+      setCameraStream(stream);
+      await mediasoupService.produceWebcam(stream);
+      setCameraOn(true);
+    } else {
+      await mediasoupService.stopProducer("video");
+      cameraStream?.getTracks().forEach((t) => t.stop());
+      setCameraStream(null);
+      setCameraOn(false);
+    }
+  };
+
+  const toggleMic = async () => {
+    if (!joined) return;
+
+    if (!micOn) {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      setMicStream(stream);
+      await mediasoupService.produceMicrophone(stream);
+      setMicOn(true);
+    } else {
+      await mediasoupService.stopProducer("audio");
+      micStream?.getTracks().forEach((t) => t.stop());
+      setMicStream(null);
+      setMicOn(false);
+    }
+  };
+
+  const toggleScreenShare = async () => {
+    if (!joined) return;
+
+    if (!isScreenSharing) {
+      const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+      stream.getVideoTracks()[0].onended = stopScreenShare;
+
+      setScreenStream(stream);
+      await mediasoupService.produceScreenShare(stream);
+
+      setIsScreenSharing(true);
+      setScreenSharingPeerId(socket.id);
+    } else {
+      stopScreenShare();
+    }
+  };
+
+  const stopScreenShare = async () => {
+    screenStream?.getTracks().forEach((t) => t.stop());
+    await mediasoupService.stopProducer("screen");
+    setScreenStream(null);
+    setIsScreenSharing(false);
+    setScreenSharingPeerId(null);
+  };
+
+
+  const screenShare =
+    isScreenSharing && screenStream
+      ? screenStream
+      : Array.from(peers.values()).find((p) => p.screenStream)?.screenStream;
+
+
   return (
     <div className='bg-black h-[100vh] w-full text-white'>
       <div className=' h-full max-w-[1400px] border-neutral-500 m-auto rounded-2xl flex overflow-hidden'>
-        <div className='w-full h-full p-6'>
+        <div className='w-full h-full'>
           <div className='flex h-full flex-col w-full h-full gap-4'>
             <div className='w-full h-10 flex justify-between items-center'>
               <div>Watch</div>
-              <div onClick={handleOnlineUsersModalClick}> 4 members</div>
+              <div onClick={handleOnlineUsersModalClick}>   
+                {Array.from(peers.values()).length+1 } Members
+              </div>
             </div>
             <div className='w-full flex flex-col relative cursor-pointer'>
               <div className='w-full h-10 flex items-center'>
@@ -101,15 +352,73 @@ const VideoMenu: React.FC = () => {
               </div>     
               <div className='w-full flex justify-between h-[500px]'>
                 <div className='w-[73%] h-full'>
-                  <div className='h-full w-full border-2 rounded-xl'></div>
+                  <div className='h-full w-full border-2 rounded-xl  overflow-hidden'>
+                    <div className="flex-1 flex justify-center items-center bg-black">
+                      {screenShare ? (
+                        <video
+                          autoPlay
+                          playsInline
+                          className=" w-full object-contain"
+                          ref={(v) => v && (v.srcObject = screenShare)}
+                        />
+                        ) : (
+                          <p className="text-gray-500">No screen shared</p>
+                        )}
+                      </div>
+                  </div>
                 </div>
                 <div className='w-[25%] h-full'>
-                  { activeTab === 'video' ? <Members peoples= {joinedPeoples} /> : <Chat/> }
+                  { activeTab === 'video' ? 
+                    <Members 
+                      // peoples= {joinedPeoples} 
+                      cameraStream= {cameraStream}
+                      cameraOn = {cameraOn}
+                      micOn = {micOn}
+                      peers = {peers}
+                      toggleMic = {toggleMic}
+                     toggleCamera = {toggleCamera} 
+                     toggleScreenShare = {toggleScreenShare}
+                     isScreenSharing = {isScreenSharing}
+                    /> : <Chat/> }
                 </div>
               </div>          
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="mb-6 w-[300px]">
+        <input
+          type="text"
+          placeholder="Search"
+          className="w-full p-3 rounded-xl bg-[#1a1a1a] border border-gray-700 
+                     focus:border-blue-500 outline-none text-white placeholder-gray-400"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        {filteredVideos.map((video) => (
+          <div className='cursor-pointer'>
+            <div className="w-full h-40 rounded-xl overflow-hidden bg-black">
+              <img
+                src={video.poster}
+                className="w-full h-full object-cover rounded-xl group-hover:opacity-80 transition"
+              />
+            </div>
+
+            <h3 className="mt-2 text-sm text-gray-300 truncate group-hover:text-white transition">
+              {video.name}
+            </h3>
+          </div>
+        ))}
+
+        {filteredVideos.length === 0 && (
+          <p className="text-gray-400 text-center col-span-full">
+            No videos found.
+          </p>
+        )}
       </div>
       <Modal isOpen={isOnlineUsersModalOpen} onClose={handleOnlineUsersModalClick}> 
         <div className='w-[300px] '>

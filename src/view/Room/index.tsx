@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Modal } from "../../components/Modal";
 import { FiPlus, FiLogIn } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
 
 export const Room = () => {
   const [rooms, setRooms] = useState([]);
+  const navigate = useNavigate()
 
   // modal states
   const [openCreate, setOpenCreate] = useState(false);
@@ -17,6 +19,7 @@ export const Room = () => {
   const handleCreateRoom = async () => {
     if (!roomName.trim()) return;
     console.log("Room Created");
+    navigate('/dashboard/room/1')
   };
 
   const handleJoinRoom = async () => {

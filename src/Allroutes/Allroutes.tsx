@@ -6,6 +6,7 @@ import { Room } from '../view/Room'
 import { Search } from '../view/Search'
 import { Home } from '../view/Home'
 import { VideoPlayer } from '../view/VideoPlayer'
+import VideoMenu from '../view/VideoMenu'
 
 export const Allroutes = () => {
   return (
@@ -18,6 +19,7 @@ export const Allroutes = () => {
         <Route path="notifications" element={<Notifications />} />
         <Route path="profile" element={<Profile />} />
         <Route path="watch/:filename" element={<VideoPlayer />} />
+        <Route path="room/:roomId" element={<VideoMenu/>} />
       </Route>
       <Route path='/' element= {<Dashboard/>} />
 

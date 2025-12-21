@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { IoIosArrowBack, IoIosNotifications, IoIosNotificationsOff } from "react-icons/io";
 import { IoSettingsOutline } from "react-icons/io5";
@@ -31,20 +31,18 @@ const VideoMenu: React.FC = () => {
 
   const [cameraStream, setCameraStream] = useState(null);
   const [micStream, setMicStream] = useState(null);
-  const [screenStream, setScreenStream] = useState(null);
 
   const [cameraOn, setCameraOn] = useState(false);
   const [micOn, setMicOn] = useState(false);
-  const [isScreenSharing, setIsScreenSharing] = useState(false);
 
   const [videos, setVideos] = useState<VideoDataType[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const [screenSharingPeerId, setScreenSharingPeerId] = useState(null);
   const [joined, setJoined] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
   const socket = useSocket();
 
+  const [activeVideo, setActiveVideo] = useState(null)
 
   const handleNotificationClick = () => {
     setNotificationShow(!isNotificationShow)
@@ -134,15 +132,10 @@ const VideoMenu: React.FC = () => {
                 micOn: false,
                 videoStream: null,
                 audioStream: null,
-                screenStream: null,
               });
             });
             return map;
           });
-        }
-
-        if (data.screenSharingPeer) {
-          setScreenSharingPeerId(data.screenSharingPeer);
         }
       }
     );
@@ -164,7 +157,6 @@ const VideoMenu: React.FC = () => {
           micOn: false,
           videoStream: null,
           audioStream: null,
-          screenStream: null,
         });
         return map;
       });
@@ -176,14 +168,10 @@ const VideoMenu: React.FC = () => {
         map.delete(peerId);
         return map;
       });
-
-      if (screenSharingPeerId === peerId) {
-        setScreenSharingPeerId(null);
-      }
     });
 
-    socket.on("new-producer", async ({ peerId, producerId, kind, appData }) => {
-      const { consumer, appData: consumerData } =
+    socket.on("new-producer", async ({ peerId, producerId, kind }) => {
+      const { consumer } =
         await mediasoupService.consume(producerId);
 
       const stream = new MediaStream([consumer.track]);
@@ -193,10 +181,8 @@ const VideoMenu: React.FC = () => {
         const peer = map.get(peerId);
 
         if (!peer) return prev;
-
-        if (consumerData?.screen) {
-          peer.screenStream = stream;
-        } else if (kind === "video") {
+ 
+        if (kind === "video") {
           peer.videoStream = stream;
           peer.cameraOn = true;
         } else if (kind === "audio") {
@@ -233,21 +219,13 @@ const VideoMenu: React.FC = () => {
       mediasoupService.closeConsumer(consumerId);
     });
 
-    socket.on("screen-share-started", ({ peerId }) =>
-      setScreenSharingPeerId(peerId)
-    );
-
-    socket.on("screen-share-stopped", () => setScreenSharingPeerId(null));
-
     return () => {
       socket.off("peer-joined");
       socket.off("peer-left");
       socket.off("new-producer");
       socket.off("consumer-closed");
-      socket.off("screen-share-started");
-      socket.off("screen-share-stopped");
     };
-  }, [socket, screenSharingPeerId]);
+  }, [socket]);
 
 
   const toggleCamera = async () => {
@@ -284,37 +262,10 @@ const VideoMenu: React.FC = () => {
     }
   };
 
-  const toggleScreenShare = async () => {
-    if (!joined) return;
-
-    if (!isScreenSharing) {
-      const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-      stream.getVideoTracks()[0].onended = stopScreenShare;
-
-      setScreenStream(stream);
-      await mediasoupService.produceScreenShare(stream);
-
-      setIsScreenSharing(true);
-      setScreenSharingPeerId(socket.id);
-    } else {
-      stopScreenShare();
-    }
-  };
-
-  const stopScreenShare = async () => {
-    screenStream?.getTracks().forEach((t) => t.stop());
-    await mediasoupService.stopProducer("screen");
-    setScreenStream(null);
-    setIsScreenSharing(false);
-    setScreenSharingPeerId(null);
-  };
-
-
-  const screenShare =
-    isScreenSharing && screenStream
-      ? screenStream
-      : Array.from(peers.values()).find((p) => p.screenStream)?.screenStream;
-
+  const handleMovieClick = (video) => {
+    const videoUrl = `${import.meta.env.VITE_SERVER_URL || 'http://localhost:8080'}/videos/stream/${video.filename}`;
+    setActiveVideo({...video, videoUrl})
+  }
 
   return (
     <div className='bg-black h-[100vh] w-full text-white'>
@@ -353,33 +304,23 @@ const VideoMenu: React.FC = () => {
               <div className='w-full flex justify-between h-[500px]'>
                 <div className='w-[73%] h-full'>
                   <div className='h-full w-full border-2 rounded-xl  overflow-hidden'>
-                    <div className="flex-1 flex justify-center items-center bg-black">
-                      {screenShare ? (
-                        <video
-                          autoPlay
-                          playsInline
-                          className=" w-full object-contain"
-                          ref={(v) => v && (v.srcObject = screenShare)}
-                        />
-                        ) : (
-                          <p className="text-gray-500">No screen shared</p>
-                        )}
-                      </div>
+                    {/* <div className="flex-1 flex justify-center items-center bg-black "> */}
+                    <div className="flex justify-center items-center bg-black h-full">
+                      <VideoPlayer video={activeVideo} />
+                    </div>
                   </div>
                 </div>
                 <div className='w-[25%] h-full'>
                   { activeTab === 'video' ? 
                     <Members 
-                      // peoples= {joinedPeoples} 
                       cameraStream= {cameraStream}
                       cameraOn = {cameraOn}
                       micOn = {micOn}
                       peers = {peers}
                       toggleMic = {toggleMic}
                      toggleCamera = {toggleCamera} 
-                     toggleScreenShare = {toggleScreenShare}
-                     isScreenSharing = {isScreenSharing}
-                    /> : <Chat/> }
+                    /> 
+                    : <Chat/> }
                 </div>
               </div>          
             </div>
@@ -400,7 +341,7 @@ const VideoMenu: React.FC = () => {
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
         {filteredVideos.map((video) => (
-          <div className='cursor-pointer'>
+          <div className='cursor-pointer' onClick={(e) => handleMovieClick(video)}>
             <div className="w-full h-40 rounded-xl overflow-hidden bg-black">
               <img
                 src={video.poster}
@@ -454,3 +395,21 @@ const OnlineMenu = ({onlineUser, onClick}:any) => {
       </div> 
   )
 }
+
+const VideoPlayer = React.memo(({ video }) => {
+  if (!video) {
+    return <p className="text-gray-500">Video not found.</p>;
+  }
+
+  return (
+    <video
+      key={video.videoUrl}
+      src={video.videoUrl}
+      poster={video.poster}
+      autoPlay
+      controls
+      playsInline
+      className="max-h-[460px] h-full w-auto object-contain rounded-lg"
+    />
+  );
+});

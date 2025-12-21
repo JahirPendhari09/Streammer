@@ -195,42 +195,12 @@ class MediasoupService {
     }
   }
 
-  async produceScreenShare(stream) {
-    try {
-      if (!this.sendTransport) {
-        await this.createSendTransport();
-      }
-
-      const videoTrack = stream.getVideoTracks()[0];
-      if (!videoTrack) {
-        throw new Error('No video track found');
-      }
-
-      if (!this.producers.has('screen')) {
-        const producer = await this.sendTransport.produce({
-          track: videoTrack,
-          appData: { screen: true }
-        });
-        this.producers.set('screen', producer);
-        console.log('Screen share producer created:', producer.id);
-        return producer;
-      }
-    } catch (error) {
-      console.error('Error producing screen share:', error);
-      throw error;
-    }
-  }
-
   async stopProducer(kind) {
     const producer = this.producers.get(kind);
     if (producer) {
       producer.close();
       this.producers.delete(kind);
       console.log(`${kind} producer stopped`);
-
-      if (kind === 'screen') {
-        this.socket.emit('stop-screen-share');
-      }
     }
   }
 

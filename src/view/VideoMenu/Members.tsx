@@ -10,8 +10,6 @@ const Members = ({
   peers,
   toggleMic, 
   toggleCamera, 
-  toggleScreenShare,
-  isScreenSharing
 }) => {
   return (
     <div className='w-full h-full'>
@@ -36,24 +34,16 @@ const Members = ({
 
       </div>
 
-      <div className="bg-gray-800 p-4 flex justify-start gap-6">
-        <button onClick={toggleMic} className=" bg-gray-700 rounded h-10 px-2 cursor-pointer">
-          {micOn ? <FiMic/> : <FiMicOff/>}
-        </button>
+      <div className='w-full h-[50px] absolute bottom-0'>
+        <div className="flex justify-start gap-4 ml-4">
+          <button onClick={toggleMic} className=" bg-gray-700 rounded h-10 px-2 cursor-pointer">
+            {micOn ? <FiMic/> : <FiMicOff color="red"/>}
+          </button>
       
-        <button
-          onClick={toggleCamera}
-          className="p-2 bg-gray-700 h-10 rounded cursor-pointer"
-        >
-          {cameraOn ? <HiOutlineVideoCamera/> : <HiOutlineVideoCameraSlash/>}
-        </button>
-      
-        <button
-          onClick={toggleScreenShare}
-          className="px-4 py-2 bg-gray-700 rounded h-10 cursor-pointer"
-        >
-          🖥️ {isScreenSharing ? "Stop Share" : "Share Screen"}
-        </button>
+          <button onClick={toggleCamera} className="p-2 bg-gray-700 h-10 rounded cursor-pointer" >
+            {cameraOn ? <HiOutlineVideoCamera/> : <HiOutlineVideoCameraSlash color="red"/>}
+          </button>
+        </div>
       </div>
     </div>
   )

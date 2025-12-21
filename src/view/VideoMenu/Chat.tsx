@@ -1,8 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BiSolidSend } from "react-icons/bi";
 import { useDispatch, useSelector } from "react-redux";
-import { io } from 'socket.io-client'
-import { getGroupChat } from "../../services/general";
 import { MdDelete } from "react-icons/md";
 import { SET_GROUP_CHAT } from "../../redux/actionTypes";
 import { useSocket } from "../../context/SocketContext";
@@ -12,7 +10,7 @@ const Chat = () => {
   const [message, setMessage] = useState<string>('')
   const bottomRef = useRef<any>(null);
   const user = useSelector((store:any) => store.auth)
-  const { chat, isLoad, group }  = useSelector((store: any) => store.chat)
+  const { chat }  = useSelector((store: any) => store.chat)
 
   const socket = useSocket()
   useEffect(() => {
